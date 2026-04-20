@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Joanna Store Manager (Full Version)</title>
+<style>
+body { font-family: Arial; background:#eef1f5; margin:0; padding:10px;}
+h2 { text-align:center; }
+.container { max-width:400px; margin:auto; }
+
+.card {
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.grid { display:flex; gap:10px; }
+
+.box {
+  flex:1; padding:10px; border-radius:10px; color:white; text-align:center;
+}
+
+.sales { background:#2196F3; }
+.profit { background:#4CAF50; }
+.stock { background:#FF9800; }
+
+input, select, button {
+  width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #ccc;
+}
+
+button { background:#2196F3; color:white; border:none; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>Joanna Store Manager</h2>
+
+<div class="card">
+  <div class="grid">
+    <div class="box sales"><p>Mauzo</p><h3 id="totalSales">0</h3></div>
+    <div class="box profit"><p>Faida</p><h3 id="totalProfit">0</h3></div>
+    <div class="box stock"><p>Stock</p><h3 id="totalStock">0</h3></div>
+  </div>
+</div>
+
+<div class="card">
+<h3>Ongeza Bidhaa</h3>
+<input id="name" placeholder="Jina la bidhaa">
+<input id="buy" placeholder="Bei ya kununua">
+<input id="sell" placeholder="Bei ya kuuza">
+<input id="stock" placeholder="Stock (idadi)">
+<button onclick="addProduct()">Hifadhi</button>
+</div>
+
+<div class="card">
+<h3>Mauzo</h3>
+<select id="product"></select>
+<input id="qty" placeholder="Idadi">
+<button onclick="sell()">Hifadhi Mauzo</button>
+<p id="info"></p>
+</div>
+
+</div>
+
+<script>
+let products = JSON.parse(localStorage.getItem("products")) || [];
+let totalSales = parseFloat(localStorage.getItem("sales")) || 0;
+let totalProfit = parseFloat(localStorage.getItem("profit")) || 0;
+
+function saveData(){
+  localStorage.setItem("products", JSON.stringify(products));
+  localStorage.setItem("sales", totalSales);
+  localStorage.setItem("profit", totalProfit);
+}
+
+function addProduct(){
+  let name = nameEl.value;
+  let buy = parseFloat(buyEl.value);
+  let sell = parseFloat(sellEl.value);
+  let stock = parseInt(stockEl.value);
+
+  products.push({name, buy, sell, stock});
+  saveData();
+  updateDropdown();
+  updateDashboard();
+}
+
+function updateDropdown(){
+  product.innerHTML="";
+  products.forEach((p,i)=>{
+    let opt=document.createElement("option");
+    opt.value=i;
+    opt.text=p.name+" ( "+p.sell+" ) Stock:"+p.stock;
+    product.appendChild(opt);
+  });
+}
+
+function sell(){
+  let i = product.value;
+  let qty = parseInt(qtyEl.value);
+
+  let p = products[i];
+  if(p.stock < qty){ alert("Stock haitoshi"); return; }
+
+  let sale = p.sell * qty;
+  let profit = (p.sell - p.buy) * qty;
+
+  p.stock -= qty;
+  totalSales += sale;
+  totalProfit += profit;
+
+  saveData();
+
+  info.innerHTML = "Umeuza "+p.name+" | Jumla:"+sale+" | Faida:"+profit;
+
+  updateDropdown();
+  updateDashboard();
+}
+
+function updateDashboard(){
+  totalSalesEl.innerHTML = totalSales;
+  totalProfitEl.innerHTML = totalProfit;
+  totalStockEl.innerHTML = products.reduce((a,b)=>a+b.stock,0);
+}
+
+let nameEl = document.getElementById("name");
+let buyEl = document.getElementById("buy");
+let sellEl = document.getElementById("sell");
+let stockEl = document.getElementById("stock");
+let product = document.getElementById("product");
+let qtyEl = document.getElementById("qty");
+let info = document.getElementById("info");
+let totalSalesEl = document.getElementById("totalSales");
+let totalProfitEl = document.getElementById("totalProfit");
+let totalStockEl = document.getElementById("totalStock");
+
+updateDropdown();
+updateDashboard();
+</script>
+
+</body>
+</html>
